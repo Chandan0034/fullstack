@@ -1,0 +1,35 @@
+.Container{
+  background-color: rgba(24 20 30);
+  color:white;
+  text-align:center;
+}
+.Container h2{
+  padding-top:10px;
+}
+.TimeComplexityContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 15px;
+  background-color: rgba(24 20 30);
+  color: white;
+  height: 100vh;
+  padding: 20px;
+  overflow-y:hidden;
+}
+.AnalyzeBtn{
+  padding: 10px;
+  font-size: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+  font-weight: w600;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #59c084;
+  border: none;
+  
+}
+.AnalyzeBtn:hover{
+  background-color: #3a8f5b;
+}
