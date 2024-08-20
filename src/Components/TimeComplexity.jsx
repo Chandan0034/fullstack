@@ -1,59 +1,3 @@
-// import React ,{useState}from 'react';
-// import AceEditor from 'react-ace'
-// import 'ace-builds/src-noconflict/theme-textmate';
-// import {useNavigate} from 'react-router-dom';
-// import axios from 'axios';
-// const TimeComplexity =()=>{
-//   const [code,setCode]=useState('');
-//   const [output,setOutput]=useState('');
-//   const navigate=useNavigate();
-//   const clickHandler=async()=>{
-//     const response=await axios({url:'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyBu2K_ZHnwa2w4QeSYXSEbAAQ2o_MLQX08',
-//       method:'post',
-//       data:{
-//         contents:[{"parts":[{"text":`${code} Analyze the time and space complexity of the given code for integer data in JSON format. Provide the time complexity expression and its computed integer value for n=20.include a brief explanation not exceeding 50 words.`}]}]
-//       }
-//     });
-//     const data=response.data.candidates[0].content.parts[0].text;
-//     console.log(data);
-//     setOutput(data);
-    
-//   }
-//   return (
-//     <div>
-//       <button onClick={clickHandler}>
-//         Chart
-//       </button>
-//       <AceEditor
-//         mode='text'
-//         theme="textmate"
-//         onLoad={(editor) => console.log(editor)}
-//         onChange={setCode}
-//         fontSize={16}
-//         value={code}
-//         setOptions={{ 
-//           enableBasicAutocompletion: false,
-//           enableLiveAutocompletion: false,
-//           tabSize:2,
-
-//         }}
-//         style={{ width: '100vw',overflowX:'auto' }}
-//       />
-//       <div style={{
-//       margin:'20px',
-//       padding:'5px',
-//       boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.2)',
-//       backgroundColor: 'white',
-//       color: 'black',
-//       borderRadius: '5px',
-//       }}>
-//         {output}
-//       </div>
-//     </div>
-//   );
-
-// }
-// export default TimeComplexity; 
 import React, { useState,useRef,useEffect} from 'react';
 import './TimeComplexity.css';
 import axios from 'axios';
@@ -65,11 +9,14 @@ import 'ace-builds/src-noconflict/mode-python';
 import 'ace-builds/src-noconflict/mode-javascript';
 import 'ace-builds/src-noconflict/mode-java';
 import 'ace-builds/src-noconflict/mode-c_cpp';
+import data from './Data';
 const LanguageDetectEditor = () => {
   
   const [mode, setMode] = useState('text');
   const [code, setCode] = useState('');
-  const [output,setOutput]=useState('');
+  const [output,setOutput]=useState({
+    "TimeComplexity":"","SpaceComplexity":"","Explanation":""
+  });
   const [isresonse,setIsresonse]=useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectTimeComplexity, setSelectTimeComplexity] = useState('');
@@ -113,11 +60,12 @@ const LanguageDetectEditor = () => {
   const handleComplexity=async()=>{
     
     try{
-      setIsresonse(false);
+      setIsresonse(true);
+      setOutput({TimeComplexity:"",SpaceComplexity:"",Explanation:""})
       const response=await axios({url:`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyBu2K_ZHnwa2w4QeSYXSEbAAQ2o_MLQX08`,
         method:'post',
         data:{
-          contents:[{"parts":[{"text":`${code} Analyze the time and space complexity of the provided algorithm, which processes integer data in JSON format. Using time complexity expression compute integer values for each n from 0 to 20 to store in Array Compute accurate same like y=expression. with explanation within the 75 words not more than 50 words. Provide a JSON output with the following structure:
+          contents:[{"parts":[{"text":`${code} Analyze the time and space complexity of the provided algorithm, which processes integer data in JSON format. Using time complexity expression compute integer values for each n from 0 to 20 to store in Array Compute accurate same like y=expression. with explanation within the 100 words not more than 100 words.in explanation not include the compute value Provide a JSON output with the following structure:
       {
       "time_complexity_expression": "<expression>",
       "space_complexity": "<expression>",
@@ -126,7 +74,7 @@ const LanguageDetectEditor = () => {
       }`}]}]
         }
       });
-      setIsresonse(true);
+      setIsresonse(false);
       console.log(response)
       if(response.status==200){
         const data=response.data.candidates[0].content.parts[0].text;
@@ -135,9 +83,15 @@ const LanguageDetectEditor = () => {
         setComplexityData(complexityData['computed_values']);
       setSelectTimeComplexity(complexityData['time_complexity_expression']);
         console.log(jsonData);
-        setOutput(jsonData);
+        console.log(complexityData);
+        //set value to setOutput
+        setOutput({
+          "TimeComplexity":complexityData['time_complexity_expression'],
+          "SpaceComplexity":complexityData['space_complexity'],
+          "Explanation":complexityData['explanation']
+        });
       }else{
-        setOutput('Something went wrong');
+        //setOutput('Something went wrong');
       }
       
     }catch(err){
@@ -145,36 +99,72 @@ const LanguageDetectEditor = () => {
     }
     
   }
-  
+  const algoHandle=(e)=>{
+    //get value of name
+    const name=e.target.name;
+    data.map((e)=>{
+      if(name==='B' && e.title==="Bubble Sort"){
+        detectLanguage(e.code);
+      }else if(name==='I' && e.title==="Insertion Sort"){
+        detectLanguage(e.code);
+      }else if(name==='S' && e.title==="Selection Sort"){
+        detectLanguage(e.code);
+      }else if(name==='M' && e.title==="Merge Sort"){
+        detectLanguage(e.code);
+      }else if(name==='Q' && e.title==="Quick Sort"){
+        detectLanguage(e.code);
+      }else if(name==='H' && e.title==="Heap Sort"){
+        detectLanguage(e.code);
+      }else if(name==='Bi' && e.title==="Binary Search"){
+        detectLanguage(e.code);
+      }else if(name==='T' && e.title==="Two-Pointer Algorithm:"){
+        detectLanguage(e.code);
+      }
+    })
+  }
   return (
     <div className="Container">
       <h2>Time Complexity And Space Complexity Analysis</h2>
       <div className='TimeComplexityContainer'>
-        <button className='AnalyzeBtn' onClick={handleOpenModal}>Graph</button>
-        <AceEditor
-          mode={mode}
-          placeholder='Enter The code for analysing the time and space complexity'
-          value={code}
-          fontSize={16}
-          theme="monokai"
-          ref={editorRef}
-          name="language-detect-editor"
-          onChange= {(value)=>detectLanguage(value)}
-          editorProps={{ $blockScrolling: true }}
-          style={{
-            width:'60vw',
-            wordBreak:'break-word',
-            whiteSpace:'pre-wrap',
-            overflowX:'hidden',
-          }}
-        ></AceEditor>
-        <button className="AnalyzeBtn" onClick={handleComplexity}>Analyze</button>
-        {
-          isresonse? <div className="responseOutput">
-            {output}
-          </div>
-          :null
-        }
+        <div className='btnHandle'>
+          <button className='AnalyzeBtn' onClick={handleOpenModal}>Graph</button>
+          <button className="AnalyzeBtn" onClick={handleComplexity}>{isresonse ? "Loading...":"Analyze"}</button>
+        </div>
+        <div>
+          <button className='algoBtn' onClick={algoHandle} name="Bi">BinaryS</button>
+          <button className='algoBtn' onClick={algoHandle} name="B">BubbleS</button>
+          <button className='algoBtn' onClick={algoHandle} name='S'>SelectionS</button>
+          <button className='algoBtn' name='I' onClick={algoHandle}>InsertionS</button>
+          <button className='algoBtn' onClick={algoHandle} name="Q">QuickS</button>
+          <button className='algoBtn' onClick={algoHandle} name="M">MergeS</button>
+          <button className='algoBtn' onClick={algoHandle} name="H">HeapS</button>
+          <button className='algoBtn' onClick={algoHandle} name='T'>TwoPointer</button>
+        </div>
+        <div className='inputOutput'>
+            <AceEditor
+              mode={mode}
+              placeholder='Enter The code for analysing the time and space complexity'
+              value={code}
+              fontSize={17}
+              theme="monokai"
+              ref={editorRef}
+              name="language-detect-editor"
+              onChange= {(value)=>detectLanguage(value)}
+              editorProps={{ $blockScrolling: true }}
+              tabSize={3}
+              style={{
+                width:'50vw',
+                height:'80vh',
+                padding: '10px',
+              }}
+            ></AceEditor>
+           <div className="responseOutput" >
+             <h1>Ouput Of Time Complexity and Space Complexity</h1>
+              <pre>TimeComplexity: {output.TimeComplexity}</pre>
+             <pre>SpaceComplexity: {output.SpaceComplexity}</pre>
+             <pre>Explanation: {output.Explanation}</pre>
+            </div>
+        </div>
       </div>
       {isModalOpen && (
         <div className="modal-overlay">
