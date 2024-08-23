@@ -1,0 +1,23 @@
+.Input {
+  caret-color: transparent; /* Hide the default caret */
+  position: relative;
+  z-index: 1;
+}
+
+.Input::before {
+  content: "";
+  position: absolute;
+  width: 10px; /* Adjust the width of the cursor here */
+  background-color: black; /* Change the color of the cursor if needed */
+  height: 1em; /* Matches the line height */
+  animation: blink-animation 1s step-end infinite;
+}
+
+@keyframes blink-animation {
+  from, to {
+    visibility: hidden;
+  }
+  50% {
+    visibility: visible;
+  }
+}

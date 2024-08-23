@@ -7,12 +7,12 @@ import 'ace-builds/src-noconflict/mode-python';
 import 'ace-builds/src-noconflict/mode-javascript';
 import 'ace-builds/src-noconflict/theme-textmate';
 import 'ace-builds/src-noconflict/ext-language_tools'; 
+import { ColorRing } from 'react-loader-spinner'
 import Output from './CodeOutputBox';
 import TimeComplexity from '../TimeComplexity';
 const socket = io("https://code-compiler-1.onrender.com/", { transports: ["websocket"] });
 import {useNavigate} from 'react-router-dom';
 const CodeEditor = ({ language, languageName,basicCode,path}) => {
-    console.log("Editor",basicCode,languageName);
   const [code, setCode] = useState(basicCode);
   const [output, setOutput] = useState(``);
   const [id,setId]=useState(``);
@@ -36,13 +36,12 @@ const CodeEditor = ({ language, languageName,basicCode,path}) => {
     };
 
     socket.on("output", handleOutput);
-
     return () => {
       socket.off("output", handleOutput);
     };
   }, []);
-
   const handleRun = () => {
+    console.log("Code",code)
     setIsLoading(true);
     setOutput('');
     console.log(languageName);
@@ -69,11 +68,11 @@ const CodeEditor = ({ language, languageName,basicCode,path}) => {
       <h2 style={{color:'black',textAlign:'center',marginTop:'5px'}}>Online {language==="c_cpp"? languageName==="c" ? "C" :"CPP":language} Code Editor</h2>
         <div style={styles.containerBox}>
           <div style={styles.LanguageIcon}>
-            <div style={styles.LanIcons}><a href={`${nextUrl}python-programming`} onClick={navigateHandle} name="python-programming"><img src='python.png' style={{height:'30px',width:'30px',objectFit:'fill'}}/></a></div>
-            <div style={styles.LanIcons}><a href={`${nextUrl}c-programming`} onClick={navigateHandle} name="c-programming"><img src='letter-c.png' style={{height:'30px',width:'30px' ,objectFit:'fill'}}/></a></div>
-            <div style={styles.LanIcons}><a href={`${nextUrl}cpp-programming`} onClick={navigateHandle} name="cpp-programming"><img src='c-.png' alt='CPP' style={{height:'30px',width:'30px',objectFit:'fill'}}/></a></div>
-            <div style={styles.LanIcons}><a href={`${nextUrl}java-programming`} onClick={navigateHandle} name="java-programming"><img src='java.png' style={{height:'30px',width:'30px',objectFit:'fill'}}/></a></div>
-            <div style={styles.LanIcons}><a href={`${nextUrl}javascript-programming`} onClick={navigateHandle} name="javascript-programming"><img src='java-script.png' style={{height:'30px',width:'30px',objectFit:'fill'}}/></a></div>
+            <div style={styles.LanIcons}><a href={`${nextUrl}python-programming`} onClick={navigateHandle} name="python-programming" title='Py'><img src='python.png' alt='py' style={{height:'30px',width:'30px',objectFit:'fill'}}/></a></div>
+            <div style={styles.LanIcons}><a href={`${nextUrl}c-programming`} onClick={navigateHandle} name="c-programming" title='C'><img src='letter-c.png' style={{height:'30px',width:'30px' ,objectFit:'fill'}}/></a></div>
+            <div style={styles.LanIcons}><a href={`${nextUrl}cpp-programming`} onClick={navigateHandle} name="cpp-programming" title='Cpp'><img src='c-.png' alt='CPP' style={{height:'30px',width:'30px',objectFit:'fill'}}/></a></div>
+            <div style={styles.LanIcons}><a href={`${nextUrl}java-programming`} onClick={navigateHandle} name="java-programming" title='Java'><img src='java.png' style={{height:'30px',width:'30px',objectFit:'fill'}}/></a></div>
+            <div style={styles.LanIcons}><a href={`${nextUrl}javascript-programming`} onClick={navigateHandle} name="javascript-programming" title='Js'><img src='java-script.png' style={{height:'30px',width:'30px',objectFit:'fill'}}/></a></div>
           </div>
          <div>
            <div style={styles.btnSection}>
@@ -81,7 +80,15 @@ const CodeEditor = ({ language, languageName,basicCode,path}) => {
                 {'Analyse'}
               </button>
              <button onClick={handleRun} disabled={isLoading} style={styles.runButton}>
-                {isLoading ? 'Running...' : 'Run Code'}
+                {isLoading ?<div style={{display:'flex',justifyContent:'center',alignItems:'center'}}> <ColorRing
+                  visible={true}
+                  height={'40'}
+                  width={'40'}
+                  ariaLabel="color-ring-loading"
+                  wrapperStyle={{}}
+                  wrapperClass="color-ring-wrapper"
+                  colors={['#e15b64', '#f47e60', '#f8b26a', '#abbd81', '#849b87']}
+                  /></div>: 'RUN'}
               </button>
            </div>
            <div style={styles.editorBox}>
@@ -89,7 +96,7 @@ const CodeEditor = ({ language, languageName,basicCode,path}) => {
              mode={language}
              theme="textmate"
              onLoad={(editor) => console.log(editor)}
-             onChange={setCode}
+             onChange={(e)=>setCode(e)}
              fontSize={16}
              value={code}
              setOptions={{ 
@@ -101,7 +108,7 @@ const CodeEditor = ({ language, languageName,basicCode,path}) => {
              ref={editorRef}
              style={{ width: '50vw',height:'92vh',overflowX:'auto' }}
            />
-           <Output value={output} ids={id} inputFunction={inputHandler}></Output>
+           <Output value={output} ids={isLoading ? "":id} inputFunction={inputHandler}></Output>
            </div>
          </div>
         </div>
@@ -135,7 +142,7 @@ const styles = {
     justifyContent:'end',
   },
   runButton: {
-    padding: '10px 20px',
+    // padding: '10px 20px',
     fontSize: '16px',
     color: '#fff',
     marginRight:'10px',
@@ -143,6 +150,8 @@ const styles = {
     border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
+    height:'40px',
+    width:'100px',
     transition: 'background-color 0.3s ease',
   },
   LanguageIcon:{
